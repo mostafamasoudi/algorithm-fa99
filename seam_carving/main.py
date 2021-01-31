@@ -1,49 +1,11 @@
-from argparse import ArgumentParser
-from PIL import Image
+import cv2
 import numpy
 import time
 
+from utils import get_args, read_image, write_image, coloring_seams
+from energy import get_energy_A, get_energy_B
 
 all_frames = []
-
-def get_args():
-    """
-        read command line arguments with this positional args
-        input_file
-        dx
-        dy
-        like this:
-        >>> python main.py input_file dx dy
-    """
-    parser = ArgumentParser()
-    parser.add_argument("input_file", type=str)
-    parser.add_argument("dx", type=int)
-    parser.add_argument("dy", type=int)
-    args = parser.parse_args()
-    return args
-
-
-def read_image(input_file):
-    ''' read input image '''
-    image = Image.open(input_file)
-    rgb_image = image.convert('RGB')
-    return rgb_image
-
-
-def coloring_seams(im_array, mask):
-    """ make seams white and save current frame for create gif """
-    current_frame = im_array.copy()
-    height = current_frame.shape[0]
-    width = current_frame.shape[1]
-    for _h in range(height):
-        for _w in range(width):
-            if mask[_h, _w] == False:
-                current_frame[_h, _w, 0]=255
-                current_frame[_h, _w, 1]=255
-                current_frame[_h, _w, 2]=255
-    
-    im_frame = Image.fromarray(current_frame.astype(numpy.uint8))
-    all_frames.append(im_frame)
 
 
 def height_norm(height, max_height):
@@ -62,34 +24,6 @@ def width_norm(width, max_width):
         return width - 1
     else:
         return width
-
-
-def get_enegry(im_array, width, height):
-    ''' 
-        Calculate energy array according to rgb value of pixels 
-        O(n ^ 2)
-    '''
-    resized_arr = numpy.pad(im_array, ((1, 1), (1, 1), (0, 0)), 'edge')
-
-    energy = numpy.zeros((height, width), dtype=int)
-    for _h in range(1, height+1):
-        for _w in range(1, width+1):
-            hor_right = resized_arr[_h, _w + 1]
-            hor_left = resized_arr[_h, _w - 1]
-            ex = ((hor_right[0] - hor_left[0]) ** 2
-                + (hor_right[1] - hor_left[1]) ** 2
-                + (hor_right[2] - hor_left[2]) ** 2
-                )
-
-            ver_up = resized_arr[_h - 1 , _w]
-            ver_down = resized_arr[_h + 1, _w]
-            ey = ((ver_down[0] - ver_up[0]) ** 2
-                + (ver_down[1] - ver_up[1]) ** 2
-                + (ver_down[2] - ver_up[2]) ** 2)
-            
-            energy[_h - 1, _w - 1] = numpy.sqrt(ex + ey)
-
-    return energy
 
 
 def find_seam(energy, width, height):
@@ -147,11 +81,6 @@ def find_seam(energy, width, height):
     return mask
 
 
-def write_image(image_array, path):
-    image_array = image_array.astype(numpy.uint8)
-    new_im = Image.fromarray(image_array)
-    new_im.save(path)
-
 def main():
     # get command line arguments
     args = get_args()
@@ -177,7 +106,7 @@ def main():
         s = time.time()
 
         # calculate energy function
-        energy = get_enegry(im_array, im_width, im_height)
+        energy = get_energy_B(im_array, im_width, im_height)
 
         print(f"calculate energy array: {time.time() - s} s")
         s = time.time()
@@ -188,7 +117,8 @@ def main():
         print(f"find seam: {time.time() - s} s")
 
         # make seam white in image and save frame
-        coloring_seams(im_array, mask)
+        frame = coloring_seams(im_array, mask)
+        all_frames.append(frame)
 
         # remove seam from image
         im_array = im_array[mask].reshape(im_height, (im_width - 1), 3)
