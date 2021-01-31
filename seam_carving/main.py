@@ -69,22 +69,9 @@ def get_enegry(im_array, width, height):
         Calculate energy array according to rgb value of pixels 
         O(n ^ 2)
     '''
-
-    # print("part 1")
-    # s = time.time()
-    # x = numpy.zeros((height, width), dtype=int)
-    # for i in range(height):
-    #     for j in range(width):
-    #         x[i, j] = numpy.sqrt(((-255) ** 2) + ((-255) ** 2) + ((-255) ** 2) + ((-255) ** 2) + ((-255) ** 2) + ((-255) ** 2))
-    # print(f"time: {time.time() - s}")
-
-    print("part 2")
-    s = time.time()
     resized_arr = numpy.pad(im_array, ((1, 1), (1, 1), (0, 0)), 'edge')
-    print(f"time: {time.time() - s}")
-    print("part 3")
-    s = time.time()
-    energy = numpy.zeros((height, width), dtype=float)
+
+    energy = numpy.zeros((height, width), dtype=int)
     for _h in range(1, height+1):
         for _w in range(1, width+1):
             hor_right = resized_arr[_h, _w + 1]
@@ -101,8 +88,7 @@ def get_enegry(im_array, width, height):
                 + (ver_down[2] - ver_up[2]) ** 2)
             
             energy[_h - 1, _w - 1] = numpy.sqrt(ex + ey)
-    print(energy)
-    print(f"time: {time.time() - s}")
+
     return energy
 
 
@@ -159,13 +145,6 @@ def find_seam(energy, width, height):
         pixel = ancestor[pixel]
     
     return mask
-            
-def merge_two_mask(smaller, bigger):
-    delta_height = bigger.shape[0] - smaller.shape[0]
-    delta_width = bigger.shape[1] - smaller.shape[1]
-    padded_smaller = numpy.pad(smaller, ((delta_height, 0), (0, delta_width)), constant_values=False)
-    final_mask = numpy.logical_and(padded_smaller, bigger)
-    return final_mask
 
 
 def write_image(image_array, path):
@@ -189,20 +168,24 @@ def main():
     im_width = image.width
     im_height = image.height
 
-    # create a mask for store all seams together
-    # all_seam_mask = numpy.ones_like(im_array,shape=(im_height, im_width), dtype=bool)
-
     # apply change in width order
     for i in range(args.dx):
+
+        # logging state
+        print(f"\nround: {i} -> im_array_width: {im_array.shape[1]}, im_array_height: {im_array.shape[0]}")
+
+        s = time.time()
 
         # calculate energy function
         energy = get_enegry(im_array, im_width, im_height)
 
+        print(f"calculate energy array: {time.time() - s} s")
+        s = time.time()
+
         # find seam and create its mask
         mask = find_seam(energy, im_width, im_height)
 
-        # merge new mask with last stored masks together
-        # all_seam_mask = merge_two_mask(mask, all_seam_mask)
+        print(f"find seam: {time.time() - s} s")
 
         # make seam white in image and save frame
         coloring_seams(im_array, mask)
@@ -210,9 +193,6 @@ def main():
         # remove seam from image
         im_array = im_array[mask].reshape(im_height, (im_width - 1), 3)
         im_width -= 1
-
-        # logging state
-        print(f"round: {i} -> im_array_width: {im_array.shape[1]}, im_array_height: {im_array.shape[0]}")
     
 
     # create and save gif file
