@@ -151,7 +151,7 @@ def main():
 
         # make seam white in image and save frame
         frame = coloring_seams(im_array, mask)
-        all_frames.append(frame)
+        all_frames.append(frame.rotate(90))
 
         # remove seam from image
         im_array = im_array[mask].reshape(im_height, im_width - 1, 3)
