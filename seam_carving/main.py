@@ -125,10 +125,45 @@ def main():
         im_width -= 1
     
 
+    # rotate image 90 degree for apply seam carving in height direction
+    im_array = numpy.rot90(im_array, 1, (1, 0))
+    (im_width, im_height) = (im_height, im_width)
+
+
+    # apply change in height order
+    for i in range(args.dy):
+
+        # logging state
+        print(f"\nround: {i} -> im_array_width: {im_array.shape[1]}, im_array_height: {im_array.shape[0]}")
+
+        s = time.time()
+
+        # calculate energy function
+        energy = get_energy_B(im_array, im_width, im_height)
+
+        print(f"calculate energy array: {time.time() - s} s")
+        s = time.time()
+
+        # find seam and create its mask
+        mask = find_seam(energy, im_width, im_height)
+
+        print(f"find seam: {time.time() - s} s")
+
+        # make seam white in image and save frame
+        frame = coloring_seams(im_array, mask)
+        all_frames.append(frame)
+
+        # remove seam from image
+        im_array = im_array[mask].reshape(im_height, im_width - 1, 3)
+        im_width -= 1
+    
+
+    # rotate image to first state
+    im_array = numpy.rot90(im_array, -1, (1, 0))
+
     # create and save gif file
     all_frames[0].save(f"output_of_{args.input_file.split('.')[0]}.gif",
-                        save_all=True, append_images=all_frames[1:],
-                         optimize=False, duration=500, loop=1)
+                        save_all=True, append_images=all_frames[1:], duration=500, loop=2)
     
     # create output file
     write_image(im_array, f"output_of_{args.input_file.split('.')[0]}.jpg")

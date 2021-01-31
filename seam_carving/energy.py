@@ -2,11 +2,12 @@ import cv2
 import numpy
 
 def get_energy_B(im_array, width, height):
-    h, w = im_array.shape[:2]
+    height = im_array.shape[0]
+    width = im_array.shape[1]
     im = cv2.cvtColor(im_array.astype(numpy.uint8), cv2.COLOR_BGR2GRAY).astype(numpy.float64)
 
-    energy = numpy.zeros((h, w))
-    m = numpy.zeros((h, w))
+    energy = numpy.zeros((height, width))
+    m = numpy.zeros((height, width))
     
     U = numpy.roll(im, 1, axis=0)
     L = numpy.roll(im, 1, axis=1)
@@ -16,7 +17,7 @@ def get_energy_B(im_array, width, height):
     cL = numpy.abs(U - L) + cU
     cR = numpy.abs(U - R) + cU
     
-    for i in range(1, h):
+    for i in range(1, height):
         mU = m[i-1]
         mL = numpy.roll(mU, 1)
         mR = numpy.roll(mU, -1)
