@@ -9,13 +9,15 @@ def get_args():
         input_file
         dx
         dy
+        -o path/to/output
         like this:
-        >>> python main.py input_file dx dy
+        >>> python main.py input1.jpg 10 10 -o output1.jpg
     """
     parser = ArgumentParser()
     parser.add_argument("input_file", type=str)
     parser.add_argument("dx", type=int)
     parser.add_argument("dy", type=int)
+    parser.add_argument("-o", "--output", type=str, default='data/output.jpg')
     args = parser.parse_args()
     return args
 

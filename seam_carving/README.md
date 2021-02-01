@@ -4,34 +4,35 @@
 ## Run project
 run with this command format:
 
-    python main.py input_file dx dy
+    python main.py input_file dx dy -o output_file
 
 
 * input_file : path of input image
 * dx : deacresing pixel number in width direction
 * dy : deacresing pixel number in height direction
+* output: path of output image and gif
 
 
 like this:
 
-    python main.py input1.jpg 10 10
+    python main.py data/In_1.jpg 10 10 -o data/Out_1.jpg
 
 -----------------------------------------------
 ## Examples
 
-`>>> python main.py input1.py 50 50`
+`>>> python main.py input1.py 50 50 -o data/output_of_input1.jpg`
 
 input example
 
-![example_input](input1.jpg)
+![example_input](data/input1.jpg)
 
 output example
 
-![example_output](output_of_input1.jpg)
+![example_output](data/output_of_input1.jpg)
 
 output gif
 
-![example_gif](output_of_input1.gif)
+![example_gif](data/output_of_input1.gif)
 
 ------------------------------------------
 ## Energy algorithm

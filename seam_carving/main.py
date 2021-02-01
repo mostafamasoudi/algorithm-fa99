@@ -162,11 +162,11 @@ def main():
     im_array = numpy.rot90(im_array, -1, (1, 0))
 
     # create and save gif file
-    all_frames[0].save(f"output_of_{args.input_file.split('.')[0]}.gif",
+    all_frames[0].save(f"{args.output.split('.')[0]}.gif",
                         save_all=True, append_images=all_frames[1:], duration=500, loop=2)
     
     # create output file
-    write_image(im_array, f"output_of_{args.input_file.split('.')[0]}.jpg")
+    write_image(im_array, f"{args.output}")
 
 
 
